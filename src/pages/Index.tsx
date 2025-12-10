@@ -5,31 +5,39 @@ import { FretesAndamento } from "@/components/sections/FretesAndamento";
 import { Historico } from "@/components/sections/Historico";
 import { Clientes, Cliente } from "@/components/sections/Clientes";
 import { PlaceholderSection } from "@/components/sections/PlaceholderSection";
-import { CargoModal } from "@/components/modals/CargoModal";
-import { CargoDetailsModal } from "@/components/modals/CargoDetailsModal";
-import { Cargo } from "@/components/cargo/CargoCard";
-import { sampleCargas, sampleClientes } from "@/data/sampleData";
+import { CargoModalCompleto } from "@/components/modals/CargoModalCompleto";
+import { CargoDetailsModalCompleto } from "@/components/modals/CargoDetailsModalCompleto";
+import { CargoCompleta, Cargo, toCargoSimples, calcularFinanceiroCarga } from "@/types/cargo";
+import { sampleCargasCompletas, sampleClientes } from "@/data/sampleData";
 import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
   const [activeSection, setActiveSection] = useState("dashboard");
-  const [cargas, setCargas] = useState<Cargo[]>(sampleCargas);
+  const [cargasCompletas, setCargasCompletas] = useState<CargoCompleta[]>(sampleCargasCompletas);
   const [clientes] = useState<Cliente[]>(sampleClientes);
   const [isCargoModalOpen, setIsCargoModalOpen] = useState(false);
-  const [selectedCargo, setSelectedCargo] = useState<Cargo | null>(null);
+  const [selectedCargo, setSelectedCargo] = useState<CargoCompleta | null>(null);
   const { toast } = useToast();
 
-  const handleAddCarga = (newCargo: Omit<Cargo, "id" | "numCarga">) => {
-    const maxId = Math.max(...cargas.map((c) => c.id), 0);
-    const maxNumCarga = Math.max(...cargas.map((c) => c.numCarga), 0);
+  // Converter para formato simplificado para os componentes que usam Cargo
+  const cargas: Cargo[] = cargasCompletas.map(toCargoSimples);
+
+  const handleAddCarga = (newCargo: Omit<CargoCompleta, "id" | "numCarga" | "totalDespesas" | "lucro" | "percentualLucro">) => {
+    const maxId = Math.max(...cargasCompletas.map((c) => c.id), 0);
+    const maxNumCarga = Math.max(...cargasCompletas.map((c) => c.numCarga), 0);
     
-    const cargo: Cargo = {
+    const calculados = calcularFinanceiroCarga(newCargo as Partial<CargoCompleta>);
+    
+    const cargo: CargoCompleta = {
       ...newCargo,
       id: maxId + 1,
       numCarga: maxNumCarga + 1,
-    };
+      totalDespesas: calculados.totalDespesas,
+      lucro: calculados.lucro,
+      percentualLucro: calculados.percentualLucro,
+    } as CargoCompleta;
     
-    setCargas([cargo, ...cargas]);
+    setCargasCompletas([cargo, ...cargasCompletas]);
     toast({
       title: "Carga adicionada!",
       description: `Carga ${String(cargo.numCarga).padStart(2, "0")} criada com sucesso.`,
@@ -37,11 +45,15 @@ const Index = () => {
   };
 
   const handleViewCargo = (cargo: Cargo) => {
-    setSelectedCargo(cargo);
+    // Encontrar a carga completa correspondente
+    const cargoCompleta = cargasCompletas.find(c => c.id === cargo.id);
+    if (cargoCompleta) {
+      setSelectedCargo(cargoCompleta);
+    }
   };
 
-  const handleMarkDelivered = (cargo: Cargo) => {
-    setCargas(cargas.map(c => 
+  const handleMarkDelivered = (cargo: CargoCompleta) => {
+    setCargasCompletas(cargasCompletas.map(c => 
       c.id === cargo.id ? { ...c, status: "entregue" as const } : c
     ));
     setSelectedCargo(null);
@@ -51,8 +63,8 @@ const Index = () => {
     });
   };
 
-  const handleDeleteCargo = (cargo: Cargo) => {
-    setCargas(cargas.filter(c => c.id !== cargo.id));
+  const handleDeleteCargo = (cargo: CargoCompleta) => {
+    setCargasCompletas(cargasCompletas.filter(c => c.id !== cargo.id));
     setSelectedCargo(null);
     toast({
       title: "Carga excluída",
@@ -108,14 +120,14 @@ const Index = () => {
         {renderSection()}
       </main>
 
-      <CargoModal
+      <CargoModalCompleto
         open={isCargoModalOpen}
         onClose={() => setIsCargoModalOpen(false)}
         onSave={handleAddCarga}
         clientes={clientes}
       />
 
-      <CargoDetailsModal
+      <CargoDetailsModalCompleto
         cargo={selectedCargo}
         open={!!selectedCargo}
         onClose={() => setSelectedCargo(null)}
