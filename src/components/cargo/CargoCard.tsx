@@ -1,19 +1,10 @@
 import { cn } from "@/lib/utils";
 import { MapPin, User, Package, Calendar } from "lucide-react";
 
-export interface Cargo {
-  id: number;
-  numCarga: number;
-  dataCarga: string;
-  origem: string;
-  destino: string;
-  motorista: string;
-  clienteNome: string;
-  peso: string;
-  valor: number;
-  status: "em-transito" | "entregue" | "em-aberto";
-  observacoes?: string;
-}
+// Re-exportando do types/cargo para manter compatibilidade
+export type { Cargo } from "@/types/cargo";
+import { Cargo } from "@/types/cargo";
+import { calcularFinanceiroCarga } from "@/types/cargo";
 
 interface CargoCardProps {
   cargo: Cargo;
