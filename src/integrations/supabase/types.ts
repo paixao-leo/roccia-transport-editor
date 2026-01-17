@@ -14,10 +14,301 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      carga_motorista_veiculo: {
+        Row: {
+          carga_id: string
+          created_at: string | null
+          id: string
+          motorista_id: string
+          veiculo_id: string | null
+        }
+        Insert: {
+          carga_id: string
+          created_at?: string | null
+          id?: string
+          motorista_id: string
+          veiculo_id?: string | null
+        }
+        Update: {
+          carga_id?: string
+          created_at?: string | null
+          id?: string
+          motorista_id?: string
+          veiculo_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "carga_motorista_veiculo_carga_id_fkey"
+            columns: ["carga_id"]
+            isOneToOne: false
+            referencedRelation: "cargas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "carga_motorista_veiculo_motorista_id_fkey"
+            columns: ["motorista_id"]
+            isOneToOne: false
+            referencedRelation: "motoristas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "carga_motorista_veiculo_veiculo_id_fkey"
+            columns: ["veiculo_id"]
+            isOneToOne: false
+            referencedRelation: "veiculos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cargas: {
+        Row: {
+          cliente_id: string | null
+          created_at: string | null
+          data_carregamento: string
+          etapa: string
+          id: string
+          nome: string
+          percurso: string | null
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          cliente_id?: string | null
+          created_at?: string | null
+          data_carregamento: string
+          etapa: string
+          id?: string
+          nome: string
+          percurso?: string | null
+          status: string
+          updated_at?: string | null
+        }
+        Update: {
+          cliente_id?: string | null
+          created_at?: string | null
+          data_carregamento?: string
+          etapa?: string
+          id?: string
+          nome?: string
+          percurso?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cargas_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cargas_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes_com_ultima_carga"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clientes: {
+        Row: {
+          cnpj_cpf: string | null
+          created_at: string | null
+          email: string | null
+          id: string
+          nome: string
+          telefone: string | null
+        }
+        Insert: {
+          cnpj_cpf?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          nome: string
+          telefone?: string | null
+        }
+        Update: {
+          cnpj_cpf?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          nome?: string
+          telefone?: string | null
+        }
+        Relationships: []
+      }
+      financeiro_cargas: {
+        Row: {
+          carga_id: string
+          created_at: string | null
+          custos_extras: number | null
+          faturamento: number
+          frete_terceiro: number | null
+          id: string
+          impostos: number | null
+          lucro: number | null
+          percentual_seguro: number
+          total_despesas: number | null
+          valor_mercadoria: number
+          valor_seguro: number | null
+        }
+        Insert: {
+          carga_id: string
+          created_at?: string | null
+          custos_extras?: number | null
+          faturamento: number
+          frete_terceiro?: number | null
+          id?: string
+          impostos?: number | null
+          lucro?: number | null
+          percentual_seguro: number
+          total_despesas?: number | null
+          valor_mercadoria: number
+          valor_seguro?: number | null
+        }
+        Update: {
+          carga_id?: string
+          created_at?: string | null
+          custos_extras?: number | null
+          faturamento?: number
+          frete_terceiro?: number | null
+          id?: string
+          impostos?: number | null
+          lucro?: number | null
+          percentual_seguro?: number
+          total_despesas?: number | null
+          valor_mercadoria?: number
+          valor_seguro?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financeiro_cargas_carga_id_fkey"
+            columns: ["carga_id"]
+            isOneToOne: true
+            referencedRelation: "cargas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      motoristas: {
+        Row: {
+          cpf: string | null
+          created_at: string | null
+          dono_antt: string | null
+          id: string
+          nome: string
+          telefone: string | null
+        }
+        Insert: {
+          cpf?: string | null
+          created_at?: string | null
+          dono_antt?: string | null
+          id?: string
+          nome: string
+          telefone?: string | null
+        }
+        Update: {
+          cpf?: string | null
+          created_at?: string | null
+          dono_antt?: string | null
+          id?: string
+          nome?: string
+          telefone?: string | null
+        }
+        Relationships: []
+      }
+      pagamentos_motoristas: {
+        Row: {
+          canhoto_recebido: boolean | null
+          carga_id: string
+          created_at: string | null
+          id: string
+          motorista_id: string
+          percentual_pago: number
+          saldo_restante: number
+          status: string
+          valor_pago: number
+          valor_total: number
+        }
+        Insert: {
+          canhoto_recebido?: boolean | null
+          carga_id: string
+          created_at?: string | null
+          id?: string
+          motorista_id: string
+          percentual_pago: number
+          saldo_restante: number
+          status: string
+          valor_pago: number
+          valor_total: number
+        }
+        Update: {
+          canhoto_recebido?: boolean | null
+          carga_id?: string
+          created_at?: string | null
+          id?: string
+          motorista_id?: string
+          percentual_pago?: number
+          saldo_restante?: number
+          status?: string
+          valor_pago?: number
+          valor_total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pagamentos_motoristas_carga_id_fkey"
+            columns: ["carga_id"]
+            isOneToOne: false
+            referencedRelation: "cargas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pagamentos_motoristas_motorista_id_fkey"
+            columns: ["motorista_id"]
+            isOneToOne: false
+            referencedRelation: "motoristas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      veiculos: {
+        Row: {
+          created_at: string | null
+          id: string
+          placa_carreta_1: string | null
+          placa_carreta_2: string | null
+          placa_veiculo: string
+          tipo: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          placa_carreta_1?: string | null
+          placa_carreta_2?: string | null
+          placa_veiculo: string
+          tipo: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          placa_carreta_1?: string | null
+          placa_carreta_2?: string | null
+          placa_veiculo?: string
+          tipo?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
-      [_ in never]: never
+      clientes_com_ultima_carga: {
+        Row: {
+          id: string | null
+          nome: string | null
+          ultima_carga: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
