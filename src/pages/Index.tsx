@@ -8,12 +8,15 @@ import { Motoristas } from "@/components/sections/Motoristas";
 import { Veiculos } from "@/components/sections/Veiculos";
 import { Saldos } from "@/components/sections/Saldos";
 import { PlaceholderSection } from "@/components/sections/PlaceholderSection";
+import { CargaModal } from "@/components/modals/CargaModal";
+import { ClienteModal } from "@/components/modals/ClienteModal";
 import { CargaCompleta } from "@/hooks/useCargas";
 import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
   const [activeSection, setActiveSection] = useState("dashboard");
   const [isCargoModalOpen, setIsCargoModalOpen] = useState(false);
+  const [isClienteModalOpen, setIsClienteModalOpen] = useState(false);
   const [selectedCarga, setSelectedCarga] = useState<CargaCompleta | null>(null);
   const { toast } = useToast();
 
@@ -47,7 +50,7 @@ const Index = () => {
       case "clientes":
         return (
           <Clientes
-            onAddCliente={() => toast({ title: "Em breve!", description: "Funcionalidade em desenvolvimento." })}
+            onAddCliente={() => setIsClienteModalOpen(true)}
             onViewCliente={() => toast({ title: "Em breve!", description: "Funcionalidade em desenvolvimento." })}
           />
         );
@@ -82,6 +85,10 @@ const Index = () => {
       <main className="flex-1 p-4 md:p-8 overflow-y-auto bg-background/80 backdrop-blur-sm pt-20 lg:pt-8">
         {renderSection()}
       </main>
+
+      {/* Modals */}
+      <CargaModal open={isCargoModalOpen} onOpenChange={setIsCargoModalOpen} />
+      <ClienteModal open={isClienteModalOpen} onOpenChange={setIsClienteModalOpen} />
     </div>
   );
 };
