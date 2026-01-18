@@ -1,19 +1,21 @@
-import { Cargo } from "@/components/cargo/CargoCard";
+import { Tables } from "@/integrations/supabase/types";
 import { format, startOfWeek, addDays, isSameDay, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
+type Carga = Tables<"cargas">;
+
 interface WeeklyCalendarViewProps {
-  cargas: Cargo[];
-  onViewCarga: (cargo: Cargo) => void;
+  cargas: Carga[];
+  onViewCarga: (cargo: Carga) => void;
 }
 
 const statusColors: Record<string, string> = {
-  "em-transito": "bg-yellow-500/20 border-yellow-500/50 text-yellow-400",
+  "em_transito": "bg-yellow-500/20 border-yellow-500/50 text-yellow-400",
   "entregue": "bg-green-500/20 border-green-500/50 text-green-400",
-  "em-aberto": "bg-blue-500/20 border-blue-500/50 text-blue-400",
+  "planejada": "bg-blue-500/20 border-blue-500/50 text-blue-400",
 };
 
 export function WeeklyCalendarView({ cargas, onViewCarga }: WeeklyCalendarViewProps) {
@@ -25,7 +27,7 @@ export function WeeklyCalendarView({ cargas, onViewCarga }: WeeklyCalendarViewPr
 
   const getCargasForDay = (date: Date) => {
     return cargas.filter((cargo) => {
-      const cargoDate = parseISO(cargo.dataCarga);
+      const cargoDate = parseISO(cargo.data_carregamento);
       return isSameDay(cargoDate, date);
     });
   };
@@ -96,11 +98,11 @@ export function WeeklyCalendarView({ cargas, onViewCarga }: WeeklyCalendarViewPr
                   <button
                     key={cargo.id}
                     onClick={() => onViewCarga(cargo)}
-                    className={`w-full text-left p-2 rounded-md border text-xs transition-all hover:scale-[1.02] ${statusColors[cargo.status]}`}
+                    className={`w-full text-left p-2 rounded-md border text-xs transition-all hover:scale-[1.02] ${statusColors[cargo.status] || statusColors["planejada"]}`}
                   >
-                    <p className="font-semibold truncate">{cargo.clienteNome}</p>
+                    <p className="font-semibold truncate">{cargo.nome}</p>
                     <p className="text-[10px] opacity-80 truncate">
-                      {cargo.origem} → {cargo.destino}
+                      {cargo.percurso || "--"}
                     </p>
                   </button>
                 ))}

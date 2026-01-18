@@ -1,38 +1,42 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Cargo } from "@/components/cargo/CargoCard";
+import { Tables } from "@/integrations/supabase/types";
 import { cn } from "@/lib/utils";
-import { MapPin, User, Building2, Package, Calendar, DollarSign, FileText, Pencil, Trash2, CheckCircle } from "lucide-react";
+import { MapPin, Package, Calendar, Truck, Pencil, Trash2, CheckCircle } from "lucide-react";
+import { format, parseISO } from "date-fns";
+import { ptBR } from "date-fns/locale";
+
+type Carga = Tables<"cargas">;
 
 interface CargoDetailsModalProps {
-  cargo: Cargo | null;
+  cargo: Carga | null;
   open: boolean;
   onClose: () => void;
-  onEdit?: (cargo: Cargo) => void;
-  onDelete?: (cargo: Cargo) => void;
-  onMarkDelivered?: (cargo: Cargo) => void;
+  onEdit?: (cargo: Carga) => void;
+  onDelete?: (cargo: Carga) => void;
+  onMarkDelivered?: (cargo: Carga) => void;
 }
 
-const statusConfig = {
-  "em-transito": {
+const statusConfig: Record<string, { label: string; className: string }> = {
+  "planejada": {
+    label: "Planejada",
+    className: "bg-blue-500/20 text-blue-400 border border-blue-500/50",
+  },
+  "em_transito": {
     label: "Em Trânsito",
-    className: "status-transit",
+    className: "bg-yellow-500/20 text-yellow-400 border border-yellow-500/50",
   },
   "entregue": {
     label: "Entregue",
-    className: "status-delivered",
-  },
-  "em-aberto": {
-    label: "Em Aberto",
-    className: "status-open",
+    className: "bg-green-500/20 text-green-400 border border-green-500/50",
   },
 };
 
 export function CargoDetailsModal({ cargo, open, onClose, onEdit, onDelete, onMarkDelivered }: CargoDetailsModalProps) {
   if (!cargo) return null;
 
-  const status = statusConfig[cargo.status];
-  const comissao = cargo.valor * 0.8;
+  const status = statusConfig[cargo.status] || statusConfig["planejada"];
+  const percurso = cargo.percurso?.split(" → ") || ["--", "--"];
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -40,9 +44,9 @@ export function CargoDetailsModal({ cargo, open, onClose, onEdit, onDelete, onMa
         <DialogHeader className="border-b border-border pb-4">
           <div className="flex justify-between items-center">
             <DialogTitle className="text-2xl text-primary">
-              CARGA {String(cargo.numCarga).padStart(2, "0")}
+              {cargo.nome}
             </DialogTitle>
-            <span className={cn("status-badge text-sm", status.className)}>
+            <span className={cn("px-3 py-1 rounded-full text-sm font-medium", status.className)}>
               {status.label}
             </span>
           </div>
@@ -58,83 +62,54 @@ export function CargoDetailsModal({ cargo, open, onClose, onEdit, onDelete, onMa
             <div className="space-y-3">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Origem:</span>
-                <span className="font-semibold text-foreground">{cargo.origem}</span>
+                <span className="font-semibold text-foreground">{percurso[0]}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Destino:</span>
-                <span className="font-semibold text-foreground">{cargo.destino}</span>
+                <span className="font-semibold text-foreground">{percurso[1] || "--"}</span>
               </div>
             </div>
           </div>
 
-          {/* Responsáveis */}
+          {/* Data e Etapa */}
           <div className="bg-secondary/50 p-4 rounded-xl border-l-4 border-l-primary">
             <h4 className="font-semibold text-foreground mb-4 flex items-center gap-2">
-              <User className="w-5 h-5 text-primary" />
-              Responsáveis
+              <Calendar className="w-5 h-5 text-primary" />
+              Informações
             </h4>
             <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Motorista:</span>
-                <span className="font-semibold text-foreground">{cargo.motorista}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Cliente:</span>
-                <span className="font-semibold text-foreground">{cargo.clienteNome}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Carga */}
-          <div className="bg-secondary/50 p-4 rounded-xl border-l-4 border-l-primary">
-            <h4 className="font-semibold text-foreground mb-4 flex items-center gap-2">
-              <Package className="w-5 h-5 text-primary" />
-              Carga
-            </h4>
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Peso:</span>
-                <span className="font-semibold text-foreground">{cargo.peso}</span>
-              </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Data:</span>
-                <span className="font-semibold text-foreground">{cargo.dataCarga}</span>
+                <span className="font-semibold text-foreground">
+                  {format(parseISO(cargo.data_carregamento), "dd/MM/yyyy", { locale: ptBR })}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Etapa:</span>
+                <span className="font-semibold text-foreground capitalize">{cargo.etapa}</span>
               </div>
             </div>
           </div>
 
-          {/* Financeiro */}
-          <div className="bg-secondary/50 p-4 rounded-xl border-l-4 border-l-primary">
+          {/* Status */}
+          <div className="bg-secondary/50 p-4 rounded-xl border-l-4 border-l-primary md:col-span-2">
             <h4 className="font-semibold text-foreground mb-4 flex items-center gap-2">
-              <DollarSign className="w-5 h-5 text-primary" />
-              Financeiro
+              <Truck className="w-5 h-5 text-primary" />
+              Status da Carga
             </h4>
             <div className="space-y-3">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Valor Frete:</span>
-                <span className="font-semibold text-primary">
-                  R$ {cargo.valor.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                <span className="text-muted-foreground">Status Atual:</span>
+                <span className={cn("px-3 py-1 rounded-full text-sm font-medium", status.className)}>
+                  {status.label}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Comissão (80%):</span>
-                <span className="font-semibold text-foreground">
-                  R$ {comissao.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                </span>
+                <span className="text-muted-foreground">Percurso Completo:</span>
+                <span className="font-semibold text-foreground">{cargo.percurso || "--"}</span>
               </div>
             </div>
           </div>
-
-          {/* Observações */}
-          {cargo.observacoes && (
-            <div className="bg-secondary/50 p-4 rounded-xl border-l-4 border-l-primary md:col-span-2">
-              <h4 className="font-semibold text-foreground mb-4 flex items-center gap-2">
-                <FileText className="w-5 h-5 text-primary" />
-                Observações
-              </h4>
-              <p className="text-foreground">{cargo.observacoes}</p>
-            </div>
-          )}
         </div>
 
         {/* Actions */}
