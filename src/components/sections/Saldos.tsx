@@ -5,7 +5,11 @@ import { usePagamentosPendentes, useConfirmarCanhoto, useQuitarSaldo, PagamentoC
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 
-export function Saldos() {
+interface SaldosProps {
+  onViewPagamento: (pagamento: PagamentoComDetalhes) => void;
+}
+
+export function Saldos({ onViewPagamento }: SaldosProps) {
   const { data: pagamentos, isLoading } = usePagamentosPendentes();
   const confirmarCanhoto = useConfirmarCanhoto();
   const quitarSaldo = useQuitarSaldo();
@@ -68,7 +72,8 @@ export function Saldos() {
           {pagamentos?.map((pagamento) => (
             <div
               key={pagamento.id}
-              className="cargo-card border-l-yellow-500"
+              onClick={() => onViewPagamento(pagamento)}
+              className="cargo-card border-l-yellow-500 cursor-pointer"
             >
               {/* Header */}
               <div className="flex justify-between items-start mb-4">
