@@ -9,24 +9,68 @@ import { Veiculos } from "@/components/sections/Veiculos";
 import { Saldos } from "@/components/sections/Saldos";
 import { PlaceholderSection } from "@/components/sections/PlaceholderSection";
 import { CargaModal } from "@/components/modals/CargaModal";
+import { CargaEditModal } from "@/components/modals/CargaEditModal";
 import { ClienteModal } from "@/components/modals/ClienteModal";
+import { ClienteEditModal } from "@/components/modals/ClienteEditModal";
+import { MotoristaModal } from "@/components/modals/MotoristaModal";
+import { VeiculoModal } from "@/components/modals/VeiculoModal";
+import { SaldoEditModal } from "@/components/modals/SaldoEditModal";
 import { CargaCompleta } from "@/hooks/useCargas";
-import { useToast } from "@/hooks/use-toast";
+import { Cliente } from "@/hooks/useClientes";
+import { Motorista } from "@/hooks/useMotoristas";
+import { Veiculo } from "@/hooks/useVeiculos";
+import { PagamentoComDetalhes } from "@/hooks/usePagamentos";
 
 const Index = () => {
   const [activeSection, setActiveSection] = useState("dashboard");
+  
+  // Modal states
   const [isCargoModalOpen, setIsCargoModalOpen] = useState(false);
   const [isClienteModalOpen, setIsClienteModalOpen] = useState(false);
+  const [isMotoristaModalOpen, setIsMotoristaModalOpen] = useState(false);
+  const [isVeiculoModalOpen, setIsVeiculoModalOpen] = useState(false);
+  
+  // Edit modal states
   const [selectedCarga, setSelectedCarga] = useState<CargaCompleta | null>(null);
-  const { toast } = useToast();
+  const [isCargaEditModalOpen, setIsCargaEditModalOpen] = useState(false);
+  
+  const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null);
+  const [isClienteEditModalOpen, setIsClienteEditModalOpen] = useState(false);
+  
+  const [selectedMotorista, setSelectedMotorista] = useState<Motorista | null>(null);
+  const [isMotoristaEditModalOpen, setIsMotoristaEditModalOpen] = useState(false);
+  
+  const [selectedVeiculo, setSelectedVeiculo] = useState<Veiculo | null>(null);
+  const [isVeiculoEditModalOpen, setIsVeiculoEditModalOpen] = useState(false);
+  
+  const [selectedPagamento, setSelectedPagamento] = useState<PagamentoComDetalhes | null>(null);
+  const [isSaldoEditModalOpen, setIsSaldoEditModalOpen] = useState(false);
 
+  // Handlers for viewing/editing
   const handleViewCarga = (carga: CargaCompleta) => {
     setSelectedCarga(carga);
-    // TODO: Open details modal
-    toast({
-      title: carga.nome,
-      description: `Percurso: ${carga.percurso || "N/A"}`,
-    });
+    setIsCargaEditModalOpen(true);
+  };
+
+  const handleViewCliente = (cliente: any) => {
+    // Cliente pode vir da view clientes_com_ultima_carga, precisamos buscar os dados completos
+    setSelectedCliente(cliente as Cliente);
+    setIsClienteEditModalOpen(true);
+  };
+
+  const handleViewMotorista = (motorista: Motorista) => {
+    setSelectedMotorista(motorista);
+    setIsMotoristaEditModalOpen(true);
+  };
+
+  const handleViewVeiculo = (veiculo: Veiculo) => {
+    setSelectedVeiculo(veiculo);
+    setIsVeiculoEditModalOpen(true);
+  };
+
+  const handleViewPagamento = (pagamento: PagamentoComDetalhes) => {
+    setSelectedPagamento(pagamento);
+    setIsSaldoEditModalOpen(true);
   };
 
   const renderSection = () => {
@@ -51,23 +95,23 @@ const Index = () => {
         return (
           <Clientes
             onAddCliente={() => setIsClienteModalOpen(true)}
-            onViewCliente={() => toast({ title: "Em breve!", description: "Funcionalidade em desenvolvimento." })}
+            onViewCliente={handleViewCliente}
           />
         );
       case "saldos":
-        return <Saldos />;
+        return <Saldos onViewPagamento={handleViewPagamento} />;
       case "motoristas":
         return (
           <Motoristas
-            onAddMotorista={() => toast({ title: "Em breve!", description: "Funcionalidade em desenvolvimento." })}
-            onViewMotorista={() => toast({ title: "Em breve!", description: "Funcionalidade em desenvolvimento." })}
+            onAddMotorista={() => setIsMotoristaModalOpen(true)}
+            onViewMotorista={handleViewMotorista}
           />
         );
       case "veiculos":
         return (
           <Veiculos
-            onAddVeiculo={() => toast({ title: "Em breve!", description: "Funcionalidade em desenvolvimento." })}
-            onViewVeiculo={() => toast({ title: "Em breve!", description: "Funcionalidade em desenvolvimento." })}
+            onAddVeiculo={() => setIsVeiculoModalOpen(true)}
+            onViewVeiculo={handleViewVeiculo}
           />
         );
       case "relatorios":
@@ -86,9 +130,48 @@ const Index = () => {
         {renderSection()}
       </main>
 
-      {/* Modals */}
+      {/* Create Modals */}
       <CargaModal open={isCargoModalOpen} onOpenChange={setIsCargoModalOpen} />
       <ClienteModal open={isClienteModalOpen} onOpenChange={setIsClienteModalOpen} />
+      <MotoristaModal 
+        open={isMotoristaModalOpen} 
+        onOpenChange={setIsMotoristaModalOpen} 
+        mode="create" 
+      />
+      <VeiculoModal 
+        open={isVeiculoModalOpen} 
+        onOpenChange={setIsVeiculoModalOpen} 
+        mode="create" 
+      />
+
+      {/* Edit Modals */}
+      <CargaEditModal
+        carga={selectedCarga}
+        open={isCargaEditModalOpen}
+        onOpenChange={setIsCargaEditModalOpen}
+      />
+      <ClienteEditModal
+        cliente={selectedCliente}
+        open={isClienteEditModalOpen}
+        onOpenChange={setIsClienteEditModalOpen}
+      />
+      <MotoristaModal
+        motorista={selectedMotorista}
+        open={isMotoristaEditModalOpen}
+        onOpenChange={setIsMotoristaEditModalOpen}
+        mode="edit"
+      />
+      <VeiculoModal
+        veiculo={selectedVeiculo}
+        open={isVeiculoEditModalOpen}
+        onOpenChange={setIsVeiculoEditModalOpen}
+        mode="edit"
+      />
+      <SaldoEditModal
+        pagamento={selectedPagamento}
+        open={isSaldoEditModalOpen}
+        onOpenChange={setIsSaldoEditModalOpen}
+      />
     </div>
   );
 };

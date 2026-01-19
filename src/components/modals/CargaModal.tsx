@@ -147,15 +147,17 @@ export function CargaModal({ open, onOpenChange }: CargaModalProps) {
       case "info":
         return !!(formData.nome && formData.data_carregamento);
       case "motorista":
+        // Motorista é opcional - sempre pode avançar
         if (formData.criar_motorista) {
           return !!formData.novo_motorista.nome;
         }
-        return !!formData.motorista_id;
+        return true;
       case "veiculo":
+        // Veículo é opcional
         if (formData.criar_veiculo) {
           return !!(formData.novo_veiculo.tipo && formData.novo_veiculo.placa_veiculo);
         }
-        return true; // Veiculo is optional
+        return true;
       case "financeiro":
         return !!(formData.faturamento && formData.valor_mercadoria && formData.percentual_seguro);
       case "docs":
@@ -419,9 +421,7 @@ export function CargaModal({ open, onOpenChange }: CargaModalProps) {
               {!formData.criar_motorista ? (
                 <>
                   <div className="space-y-2">
-                    <Label>
-                      Selecione o Motorista <span className="text-destructive">*</span>
-                    </Label>
+                    <Label>Selecione o Motorista (opcional)</Label>
                     <Select
                       value={formData.motorista_id}
                       onValueChange={(value) => handleChange("motorista_id", value)}
