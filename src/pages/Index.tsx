@@ -7,7 +7,7 @@ import { Clientes } from "@/components/sections/Clientes";
 import { Motoristas } from "@/components/sections/Motoristas";
 import { Veiculos } from "@/components/sections/Veiculos";
 import { Saldos } from "@/components/sections/Saldos";
-import { PlaceholderSection } from "@/components/sections/PlaceholderSection";
+import { Relatorios } from "@/components/sections/Relatorios";
 import { CargaModal } from "@/components/modals/CargaModal";
 import { CargaEditModal } from "@/components/modals/CargaEditModal";
 import { ClienteModal } from "@/components/modals/ClienteModal";
@@ -115,7 +115,7 @@ const Index = () => {
           />
         );
       case "relatorios":
-        return <PlaceholderSection title="Relatórios" buttonText="Gerar Relatório" />;
+        return <Relatorios />;
       default:
         return null;
     }
