@@ -65,9 +65,14 @@ interface FormData {
   valor_mercadoria: string;
   percentual_seguro: string;
   frete_terceiro: string;
-  impostos: string;
+  aliquota_icms: number;
   custos_extras: string;
 }
+
+// Constantes de impostos
+const PERCENTUAL_SEGURO = 0.065; // 0.065%
+const IMPOSTO_FEDERAL = 7; // 7% fixo
+const ALIQUOTAS_ICMS = [7, 12, 17, 18, 19, 20, 22] as const;
 
 const initialFormData: FormData = {
   nome: "",
@@ -85,9 +90,9 @@ const initialFormData: FormData = {
   criar_veiculo: false,
   faturamento: "",
   valor_mercadoria: "",
-  percentual_seguro: "0.35",
+  percentual_seguro: "0.065",
   frete_terceiro: "",
-  impostos: "",
+  aliquota_icms: 7,
   custos_extras: "",
 };
 
@@ -116,12 +121,17 @@ export function CargaModal({ open, onOpenChange }: CargaModalProps) {
   // Computed financeiro values
   const faturamento = parseFloat(formData.faturamento) || 0;
   const valorMercadoria = parseFloat(formData.valor_mercadoria) || 0;
-  const percentualSeguro = parseFloat(formData.percentual_seguro) || 0;
+  const percentualSeguro = parseFloat(formData.percentual_seguro) || PERCENTUAL_SEGURO;
   const valorSeguro = valorMercadoria * (percentualSeguro / 100);
   const freteTerceiro = parseFloat(formData.frete_terceiro) || 0;
-  const impostos = parseFloat(formData.impostos) || 0;
   const custosExtras = parseFloat(formData.custos_extras) || 0;
-  const totalDespesas = freteTerceiro + impostos + valorSeguro + custosExtras;
+  
+  // Cálculos automáticos de impostos
+  const impostoFederal = faturamento * (IMPOSTO_FEDERAL / 100);
+  const impostoIcms = faturamento * (formData.aliquota_icms / 100);
+  const totalImpostos = impostoFederal + impostoIcms;
+  
+  const totalDespesas = freteTerceiro + totalImpostos + valorSeguro + custosExtras;
   const lucro = faturamento - totalDespesas;
 
   const handleChange = <K extends keyof FormData>(field: K, value: FormData[K]) => {
@@ -221,7 +231,7 @@ export function CargaModal({ open, onOpenChange }: CargaModalProps) {
           valor_mercadoria: valorMercadoria,
           percentual_seguro: percentualSeguro,
           frete_terceiro: freteTerceiro || 0,
-          impostos: impostos || 0,
+          impostos: totalImpostos,
           custos_extras: custosExtras || 0,
         },
         motoristaId: motoristaId || undefined,
@@ -649,15 +659,6 @@ export function CargaModal({ open, onOpenChange }: CargaModalProps) {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Impostos (R$)</Label>
-                  <Input
-                    type="number"
-                    placeholder="0,00"
-                    value={formData.impostos}
-                    onChange={(e) => handleChange("impostos", e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
                   <Label>Custos Extras (R$)</Label>
                   <Input
                     type="number"
@@ -665,6 +666,62 @@ export function CargaModal({ open, onOpenChange }: CargaModalProps) {
                     value={formData.custos_extras}
                     onChange={(e) => handleChange("custos_extras", e.target.value)}
                   />
+                </div>
+              </div>
+
+              {/* Impostos automáticos */}
+              <div className="p-4 rounded-lg bg-muted/50 border space-y-4">
+                <h4 className="font-semibold text-sm flex items-center gap-2">
+                  Impostos (Calculados Automaticamente)
+                </h4>
+                
+                {/* Imposto Federal */}
+                <div className="flex justify-between items-center p-3 rounded-lg bg-background">
+                  <div>
+                    <p className="font-medium text-sm">Imposto Federal</p>
+                    <p className="text-xs text-muted-foreground">{IMPOSTO_FEDERAL}% do faturamento</p>
+                  </div>
+                  <p className="font-bold text-orange-400">
+                    R$ {impostoFederal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                  </p>
+                </div>
+                
+                {/* ICMS */}
+                <div className="p-3 rounded-lg bg-background space-y-3">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="font-medium text-sm">ICMS</p>
+                      <p className="text-xs text-muted-foreground">Selecione a alíquota</p>
+                    </div>
+                    <p className="font-bold text-orange-400">
+                      R$ {impostoIcms.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {ALIQUOTAS_ICMS.map((aliquota) => (
+                      <button
+                        key={aliquota}
+                        type="button"
+                        onClick={() => handleChange("aliquota_icms", aliquota)}
+                        className={cn(
+                          "px-3 py-1.5 rounded-lg text-sm font-medium transition-all",
+                          formData.aliquota_icms === aliquota
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted hover:bg-muted/80"
+                        )}
+                      >
+                        {aliquota}%
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Total Impostos */}
+                <div className="flex justify-between items-center p-3 rounded-lg bg-orange-500/10 border border-orange-500/30">
+                  <p className="font-semibold">Total de Impostos</p>
+                  <p className="text-lg font-bold text-orange-400">
+                    R$ {totalImpostos.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                  </p>
                 </div>
               </div>
 
