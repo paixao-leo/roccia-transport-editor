@@ -51,6 +51,8 @@ export function CargaEditModal({ carga, open, onOpenChange }: CargaEditModalProp
   const [motoristaId, setMotoristaId] = useState("");
   const [veiculoId, setVeiculoId] = useState("");
   const [status, setStatus] = useState("planejada");
+  const [classificada, setClassificada] = useState(false);
+  const [tipoFrete, setTipoFrete] = useState("dedicado");
   
   // Financeiro state
   const [faturamento, setFaturamento] = useState("");
@@ -83,6 +85,8 @@ export function CargaEditModal({ carga, open, onOpenChange }: CargaEditModalProp
       setStatus(carga.status || "planejada");
       setMotoristaId(carga.motorista_veiculo?.motorista_id || "");
       setVeiculoId(carga.motorista_veiculo?.veiculo_id || "");
+      setClassificada((carga as any).classificada || false);
+      setTipoFrete((carga as any).tipo_frete || "dedicado");
       
       if (carga.financeiro) {
         setFaturamento(carga.financeiro.faturamento?.toString() || "");
@@ -143,6 +147,8 @@ export function CargaEditModal({ carga, open, onOpenChange }: CargaEditModalProp
           percurso,
           cliente_id: clienteId || null,
           status,
+          classificada,
+          tipo_frete: tipoFrete,
         },
         financeiro: {
           faturamento: parseFloat(faturamento) || 0,
@@ -250,12 +256,22 @@ export function CargaEditModal({ carga, open, onOpenChange }: CargaEditModalProp
               <Package className="w-6 h-6" />
               {carga.nome}
             </DialogTitle>
-            <span className={cn(
-              "px-3 py-1.5 rounded-full text-sm font-medium border",
-              statusInfo.className
-            )}>
-              {statusInfo.label}
-            </span>
+            <div className="flex items-center gap-2">
+              {classificada && (
+                <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-500/20 text-purple-400 border border-purple-500/50">
+                  Classificada
+                </span>
+              )}
+              <span className="px-2 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground border">
+                {tipoFrete === "fracionado" ? "Fracionado" : "Dedicado"}
+              </span>
+              <span className={cn(
+                "px-3 py-1.5 rounded-full text-sm font-medium border",
+                statusInfo.className
+              )}>
+                {statusInfo.label}
+              </span>
+            </div>
           </div>
         </DialogHeader>
 
@@ -277,16 +293,79 @@ export function CargaEditModal({ carga, open, onOpenChange }: CargaEditModalProp
               </div>
               <div className="space-y-2">
                 <Label className="text-muted-foreground text-xs">Status</Label>
-                <Select value={status} onValueChange={setStatus}>
-                  <SelectTrigger className="bg-background">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="planejada">Planejada</SelectItem>
-                    <SelectItem value="em_transito">Em Trânsito</SelectItem>
-                    <SelectItem value="entregue">Entregue</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="flex gap-2">
+                  {(["planejada", "em_transito", "entregue"] as const).map((s) => {
+                    const cfg = statusConfig[s];
+                    return (
+                      <button
+                        key={s}
+                        onClick={() => setStatus(s)}
+                        className={cn(
+                          "flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all border",
+                          status === s
+                            ? cfg.className
+                            : "bg-muted/50 text-muted-foreground border-transparent hover:bg-muted"
+                        )}
+                      >
+                        {cfg.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-muted-foreground text-xs">Classificada</Label>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setClassificada(false)}
+                    className={cn(
+                      "flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all border",
+                      !classificada
+                        ? "bg-primary/20 text-primary border-primary/50"
+                        : "bg-muted/50 text-muted-foreground border-transparent hover:bg-muted"
+                    )}
+                  >
+                    Não
+                  </button>
+                  <button
+                    onClick={() => setClassificada(true)}
+                    className={cn(
+                      "flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all border",
+                      classificada
+                        ? "bg-purple-500/20 text-purple-400 border-purple-500/50"
+                        : "bg-muted/50 text-muted-foreground border-transparent hover:bg-muted"
+                    )}
+                  >
+                    Sim
+                  </button>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-muted-foreground text-xs">Tipo de Frete</Label>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setTipoFrete("dedicado")}
+                    className={cn(
+                      "flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all border",
+                      tipoFrete === "dedicado"
+                        ? "bg-primary/20 text-primary border-primary/50"
+                        : "bg-muted/50 text-muted-foreground border-transparent hover:bg-muted"
+                    )}
+                  >
+                    Dedicado
+                  </button>
+                  <button
+                    onClick={() => setTipoFrete("fracionado")}
+                    className={cn(
+                      "flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all border",
+                      tipoFrete === "fracionado"
+                        ? "bg-primary/20 text-primary border-primary/50"
+                        : "bg-muted/50 text-muted-foreground border-transparent hover:bg-muted"
+                    )}
+                  >
+                    Fracionado
+                  </button>
+                </div>
               </div>
               <div className="space-y-2">
                 <Label className="text-muted-foreground text-xs flex items-center gap-1">
@@ -651,6 +730,11 @@ export function CargaEditModal({ carga, open, onOpenChange }: CargaEditModalProp
                   calculos.lucro >= 0 ? "text-green-500" : "text-destructive"
                 )}>
                   R$ {calculos.lucro.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                  {(parseFloat(faturamento) || 0) > 0 && (
+                    <span className="text-base ml-2 opacity-80">
+                      ({((calculos.lucro / (parseFloat(faturamento) || 1)) * 100).toFixed(1)}%)
+                    </span>
+                  )}
                 </p>
               </div>
             </div>

@@ -62,6 +62,7 @@ export type Database = {
       }
       cargas: {
         Row: {
+          classificada: boolean
           cliente_id: string | null
           created_at: string | null
           data_carregamento: string
@@ -70,9 +71,11 @@ export type Database = {
           nome: string
           percurso: string | null
           status: string
+          tipo_frete: string
           updated_at: string | null
         }
         Insert: {
+          classificada?: boolean
           cliente_id?: string | null
           created_at?: string | null
           data_carregamento: string
@@ -81,9 +84,11 @@ export type Database = {
           nome: string
           percurso?: string | null
           status: string
+          tipo_frete?: string
           updated_at?: string | null
         }
         Update: {
+          classificada?: boolean
           cliente_id?: string | null
           created_at?: string | null
           data_carregamento?: string
@@ -92,6 +97,7 @@ export type Database = {
           nome?: string
           percurso?: string | null
           status?: string
+          tipo_frete?: string
           updated_at?: string | null
         }
         Relationships: [
