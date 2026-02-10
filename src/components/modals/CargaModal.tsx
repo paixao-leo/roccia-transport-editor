@@ -52,6 +52,8 @@ interface FormData {
   origem_estado: string;
   destino_cidade: string;
   destino_estado: string;
+  classificada: boolean;
+  tipo_frete: string;
   // Motorista
   motorista_id: string;
   novo_motorista: { nome: string; cpf: string; telefone: string; dono_antt: string };
@@ -82,6 +84,8 @@ const initialFormData: FormData = {
   origem_estado: "",
   destino_cidade: "",
   destino_estado: "",
+  classificada: false,
+  tipo_frete: "dedicado",
   motorista_id: "",
   novo_motorista: { nome: "", cpf: "", telefone: "", dono_antt: "" },
   criar_motorista: false,
@@ -225,6 +229,8 @@ export function CargaModal({ open, onOpenChange }: CargaModalProps) {
           percurso: percurso || null,
           etapa: "docs",
           status: "planejada",
+          classificada: formData.classificada,
+          tipo_frete: formData.tipo_frete,
         },
         financeiro: {
           faturamento,
@@ -423,6 +429,68 @@ export function CargaModal({ open, onOpenChange }: CargaModalProps) {
                   <p className="text-white font-medium">{percurso}</p>
                 </div>
               )}
+
+              {/* Classificada e Tipo de Frete */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Carga Classificada</Label>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleChange("classificada", false)}
+                      className={cn(
+                        "flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all border",
+                        !formData.classificada
+                          ? "bg-primary/20 text-primary border-primary/50"
+                          : "bg-muted/50 text-muted-foreground border-transparent hover:bg-muted"
+                      )}
+                    >
+                      Não
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleChange("classificada", true)}
+                      className={cn(
+                        "flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all border",
+                        formData.classificada
+                          ? "bg-purple-500/20 text-purple-400 border-purple-500/50"
+                          : "bg-muted/50 text-muted-foreground border-transparent hover:bg-muted"
+                      )}
+                    >
+                      Sim
+                    </button>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Tipo de Frete</Label>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleChange("tipo_frete", "dedicado")}
+                      className={cn(
+                        "flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all border",
+                        formData.tipo_frete === "dedicado"
+                          ? "bg-primary/20 text-primary border-primary/50"
+                          : "bg-muted/50 text-muted-foreground border-transparent hover:bg-muted"
+                      )}
+                    >
+                      Dedicado
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleChange("tipo_frete", "fracionado")}
+                      className={cn(
+                        "flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all border",
+                        formData.tipo_frete === "fracionado"
+                          ? "bg-primary/20 text-primary border-primary/50"
+                          : "bg-muted/50 text-muted-foreground border-transparent hover:bg-muted"
+                      )}
+                    >
+                      Fracionado
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
@@ -748,6 +816,11 @@ export function CargaModal({ open, onOpenChange }: CargaModalProps) {
                     )}
                   >
                     R$ {lucro.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                    {faturamento > 0 && (
+                      <span className="text-sm ml-1 opacity-80">
+                        ({((lucro / faturamento) * 100).toFixed(1)}%)
+                      </span>
+                    )}
                   </p>
                 </div>
               </div>
