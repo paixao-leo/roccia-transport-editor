@@ -37,10 +37,12 @@ export function useSearchMotoristas(searchTerm: string) {
         return data as Motorista[];
       }
 
+      // Sanitize search input to prevent SQL injection
+      const sanitized = searchTerm.replace(/[^a-zA-Z0-9À-ÿ\s\-\.]/g, '').slice(0, 50);
       const { data, error } = await supabase
         .from("motoristas")
         .select("*")
-        .or(`nome.ilike.%${searchTerm}%,cpf.ilike.%${searchTerm}%,telefone.ilike.%${searchTerm}%`)
+        .or(`nome.ilike.%${sanitized}%,cpf.ilike.%${sanitized}%,telefone.ilike.%${sanitized}%`)
         .order("nome");
 
       if (error) throw error;
