@@ -11,8 +11,10 @@ import {
   BarChart3,
   Menu,
   Car,
+  LogOut,
 } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface SidebarProps {
   activeSection: string;
@@ -35,6 +37,8 @@ function SidebarContent({
   onSectionChange,
   onClose,
 }: SidebarProps & { onClose?: () => void }) {
+  const { signOut, user, userRole } = useAuth();
+
   return (
     <nav className="w-full h-full gradient-dark flex flex-col overflow-y-auto">
       {/* Logo */}
@@ -68,6 +72,19 @@ function SidebarContent({
           );
         })}
       </ul>
+
+      {/* User info & Logout */}
+      <div className="border-t border-primary p-4 space-y-2">
+        <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+        <p className="text-xs text-primary font-semibold uppercase">{userRole || "—"}</p>
+        <button
+          onClick={signOut}
+          className="nav-link w-full text-left text-destructive hover:text-destructive"
+        >
+          <LogOut className="w-5 h-5" />
+          <span className="font-medium">Sair</span>
+        </button>
+      </div>
     </nav>
   );
 }
